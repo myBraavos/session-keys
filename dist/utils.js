@@ -35,12 +35,9 @@ const getAllowedMethodCalldata = (requestedMethods, version = "v1") => {
 };
 exports.getAllowedMethodCalldata = getAllowedMethodCalldata;
 const noCalldataContradiction = (requestedMethod, call) => {
-    return (requestedMethod.calldataValidations?.every(validation => validation.offset <
-        (Array.isArray(call.calldata) ? call.calldata.length : 0) &&
-        validation.value ===
-            (Array.isArray(call.calldata)
-                ? call.calldata[validation.offset]
-                : undefined)) ?? true);
+    const calldata = starknet_1.CallData.compile(call.calldata);
+    return (requestedMethod.calldataValidations?.every(validation => validation.offset < calldata.length &&
+        (0, exports.numberToHex)(validation.value) === (0, exports.numberToHex)(calldata[validation.offset])) ?? true);
 };
 const isNullish = (a) => typeof a === "undefined" || a === null;
 exports.isNullish = isNullish;
