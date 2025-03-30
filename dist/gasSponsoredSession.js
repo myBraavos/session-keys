@@ -17,8 +17,8 @@ const getGasSponsoredSessionRequestTypedData = (request, chainId, version = "v1"
         },
         message: {
             Caller: request.callerAddress,
-            "Execute After": request.executeAfter.getTime(),
-            "Execute Before": request.executeBefore.getTime(),
+            "Execute After": Math.round(request.executeAfter.getTime() / 1000),
+            "Execute Before": Math.round(request.executeBefore.getTime() / 1000),
             "Allowed Methods": request.requestedMethods.map(method => {
                 return {
                     "Contract Address": method.contractAddress,

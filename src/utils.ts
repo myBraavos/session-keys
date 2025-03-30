@@ -154,8 +154,8 @@ const getCalldata = (
 ): RawArgs => {
     const sigArray = stark.formatSignature(request.gsSessionSignature);
     return [
-        request.executeAfter.getTime(),
-        request.executeBefore.getTime(),
+        Math.round(request.executeAfter.getTime() / 1000),
+        Math.round(request.executeBefore.getTime() / 1000),
         ...getAllowedMethodCalldata(request.requestedMethods, version),
         ...getSpendingLimitCalldata(request.spendingLimits),
         ...(version === "v2"
