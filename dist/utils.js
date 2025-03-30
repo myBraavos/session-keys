@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCallDataValidationCalldata = exports.getCalldata = exports.getSpendingLimitCalldata = exports.getAllowedMethodHintsCalldata = exports.getAllowedMethodCalldata = void 0;
+exports.getCallDataValidationCalldata = exports.getCalldata = exports.getSpendingLimitCalldata = exports.getAllowedMethodHintsCalldata = exports.getAllowedMethodCalldata = exports.numberToHex = exports.isNullish = void 0;
 const starknet_1 = require("starknet");
 const typedDataConsts_1 = require("./typedDataConsts");
 const typedDataConstsV2_1 = require("./typedDataConstsV2");
@@ -11,7 +11,7 @@ const GAS_SPONSORED_SESSION_EXECUTION_HASH_V2 = starknet_1.typedData.getTypeHash
 const getRequestedMethodGuid = (requestedMethod) => starknet_1.hash.computePoseidonHashOnElements([
     ALLOWED_METHOD_HASH,
     requestedMethod.contractAddress,
-    requestedMethod.selector ?? starknet_1.selector.getSelectorFromName(requestedMethod.entrypoint),
+    (0, exports.numberToHex)(requestedMethod.selector ?? starknet_1.selector.getSelectorFromName(requestedMethod.entrypoint)),
 ]);
 const getCalldataValidationHash = (validation) => starknet_1.hash.computePoseidonHashOnElements([
     CALLDATA_VALIDATION_HASH,
@@ -22,7 +22,7 @@ const getCalldataValidationHash = (validation) => starknet_1.hash.computePoseido
 const getRequestedMethodGuidV2 = (requestedMethod) => starknet_1.hash.computePoseidonHashOnElements([
     ALLOWED_METHOD_HASH_V2,
     requestedMethod.contractAddress,
-    requestedMethod.selector ?? starknet_1.selector.getSelectorFromName(requestedMethod.entrypoint),
+    (0, exports.numberToHex)(requestedMethod.selector ?? starknet_1.selector.getSelectorFromName(requestedMethod.entrypoint)),
     starknet_1.hash.computePoseidonHashOnElements(requestedMethod.calldataValidations?.map(validation => getCalldataValidationHash(validation)) || []),
 ]);
 const getAllowedMethodCalldata = (requestedMethods, version = "v1") => {
@@ -42,11 +42,36 @@ const noCalldataContradiction = (requestedMethod, call) => {
                 ? call.calldata[validation.offset]
                 : undefined)) ?? true);
 };
+const isNullish = (a) => typeof a === "undefined" || a === null;
+exports.isNullish = isNullish;
+const numberToHex = (n) => {
+    try {
+        // be optimistically fast -
+        return (0, exports.isNullish)(n) ? n : `0x${BigInt(n).toString(16)}`;
+    }
+    catch (err) {
+        // and handle edge-cases here -
+        const str = `${n || ""}`.trim().toLowerCase();
+        // is a leading 0x without actual hex data
+        if (str === "0x") {
+            return "0x0";
+        }
+        // is hex string missing a leading 0x
+        if (/^(?!0x|0X)[0-9a-fA-F]+$/.test(str)) {
+            return (0, exports.numberToHex)(`0x${str}`);
+        }
+        // learn about edge-cases
+        console.error(`numberToHex error for "${n}":`, err, err?.stack);
+        // and fallback to NaN
+        return `${Number.NaN}`;
+    }
+};
+exports.numberToHex = numberToHex;
 const getAllowedMethodHintsCalldata = (requestedMethods, calls) => {
     return [
         calls.length,
         ...calls.map(call => requestedMethods.findIndex(rm => rm.contractAddress === call.contractAddress &&
-            rm.entrypoint ? rm.entrypoint === call.entrypoint : rm.selector === starknet_1.selector.getSelectorFromName(call.entrypoint) &&
+            (rm.entrypoint ? rm.entrypoint === call.entrypoint : (0, exports.numberToHex)(rm.selector) === (0, exports.numberToHex)(starknet_1.selector.getSelectorFromName(call.entrypoint))) &&
             noCalldataContradiction(rm, call))),
     ];
 };

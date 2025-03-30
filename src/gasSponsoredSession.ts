@@ -4,7 +4,7 @@ import {
     GasSponsoredSessionTransactionRequest,
 } from "./types";
 import { GS_SESSION_REQUEST_TYPES } from "./typedDataConsts";
-import { getCalldata } from "./utils";
+import { getCalldata, numberToHex } from "./utils";
 import { GS_SESSION_REQUEST_TYPES_V2 } from "./typedDataConstsV2";
 
 const getGasSponsoredSessionRequestTypedData = (
@@ -28,7 +28,7 @@ const getGasSponsoredSessionRequestTypedData = (
             "Allowed Methods": request.requestedMethods.map(method => {
                 return {
                     "Contract Address": method.contractAddress,
-                    Selector: method.selector ?? hash.getSelectorFromName(method.entrypoint!),
+                    Selector: numberToHex(method.selector ?? hash.getSelectorFromName(method.entrypoint!)),
                     ...(version === "v2" &&
                         method.calldataValidations && {
                             "Calldata Validations": method.calldataValidations.map(

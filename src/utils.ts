@@ -45,7 +45,7 @@ const getRequestedMethodGuid = (requestedMethod: RequestedMethod): string =>
     hash.computePoseidonHashOnElements([
         ALLOWED_METHOD_HASH,
         requestedMethod.contractAddress,
-        requestedMethod.selector ?? selector.getSelectorFromName(requestedMethod.entrypoint!),
+        numberToHex(requestedMethod.selector ?? selector.getSelectorFromName(requestedMethod.entrypoint!)),
     ]);
 
 const getCalldataValidationHash = (validation: CalldataValidation): string =>
@@ -60,7 +60,7 @@ const getRequestedMethodGuidV2 = (requestedMethod: RequestedMethod): string =>
     hash.computePoseidonHashOnElements([
         ALLOWED_METHOD_HASH_V2,
         requestedMethod.contractAddress,
-        requestedMethod.selector ?? selector.getSelectorFromName(requestedMethod.entrypoint!),
+        numberToHex(requestedMethod.selector ?? selector.getSelectorFromName(requestedMethod.entrypoint!)),
         hash.computePoseidonHashOnElements(
             requestedMethod.calldataValidations?.map(validation =>
                 getCalldataValidationHash(validation)
@@ -99,6 +99,35 @@ const noCalldataContradiction = (
     );
 };
 
+export const isNullish = <T>(a: T | undefined | null): a is undefined | null =>
+    typeof a === "undefined" || a === null;
+
+export const numberToHex = (n: string | number | bigint): string => {
+    try {
+        // be optimistically fast -
+        return isNullish(n) ? n : `0x${BigInt(n).toString(16)}`;
+    } catch (err) {
+        // and handle edge-cases here -
+
+        const str = `${n || ""}`.trim().toLowerCase();
+
+        // is a leading 0x without actual hex data
+        if (str === "0x") {
+            return "0x0";
+        }
+
+        // is hex string missing a leading 0x
+        if (/^(?!0x|0X)[0-9a-fA-F]+$/.test(str)) {
+            return numberToHex(`0x${str}`);
+        }
+
+        // learn about edge-cases
+        console.error(`numberToHex error for "${n}":`, err, (err as any)?.stack);
+        // and fallback to NaN
+        return `${Number.NaN}`;
+    }
+};
+
 const getAllowedMethodHintsCalldata = (
     requestedMethods: RequestedMethod[],
     calls: Call[]
@@ -109,7 +138,7 @@ const getAllowedMethodHintsCalldata = (
             requestedMethods.findIndex(
                 rm =>
                     rm.contractAddress === call.contractAddress &&
-                        rm.entrypoint ? rm.entrypoint === call.entrypoint : rm.selector === selector.getSelectorFromName(call.entrypoint) &&
+                    (rm.entrypoint ? rm.entrypoint === call.entrypoint : numberToHex(rm.selector!) === numberToHex(selector.getSelectorFromName(call.entrypoint))) &&
                     noCalldataContradiction(rm, call)
             )
         ),

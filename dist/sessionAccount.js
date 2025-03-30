@@ -26,7 +26,7 @@ const getSessionRequestTypedData = (request, chainId, version = "v2") => {
             "Allowed Methods": request.requestedMethods.map(method => {
                 return {
                     "Contract Address": method.contractAddress,
-                    Selector: method.selector ?? starknet_1.hash.getSelectorFromName(method.entrypoint),
+                    Selector: (0, utils_1.numberToHex)(method.selector ?? starknet_1.hash.getSelectorFromName(method.entrypoint)),
                     ...(version === "v2" &&
                         method.calldataValidations && {
                         "Calldata Validations": method.calldataValidations.map(validation => {
