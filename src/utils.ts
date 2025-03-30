@@ -7,6 +7,7 @@ import {
     Call,
     RawArgs,
     stark,
+    CallData,
 } from "starknet";
 import { GS_SESSION_REQUEST_TYPES } from "./typedDataConsts";
 import { GS_SESSION_REQUEST_TYPES_V2 } from "./typedDataConstsV2";
@@ -86,15 +87,12 @@ const noCalldataContradiction = (
     requestedMethod: RequestedMethod,
     call: Call
 ): boolean => {
+    const calldata = CallData.compile(call.calldata!)
     return (
         requestedMethod.calldataValidations?.every(
             validation =>
-                validation.offset <
-                    (Array.isArray(call.calldata) ? call.calldata.length : 0) &&
-                validation.value ===
-                    (Array.isArray(call.calldata)
-                        ? call.calldata[validation.offset]
-                        : undefined)
+                validation.offset < calldata.length &&
+                numberToHex(validation.value) === numberToHex(calldata[validation.offset])
         ) ?? true
     );
 };
