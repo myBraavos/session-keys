@@ -50,7 +50,7 @@ const getSessionRequestTypedData = (
             "Allowed Methods": request.requestedMethods.map(method => {
                 return {
                     "Contract Address": method.contractAddress,
-                    Selector: hash.getSelectorFromName(method.entrypoint),
+                    Selector: method.selector ?? hash.getSelectorFromName(method.entrypoint!),
                     ...(version === "v2" &&
                         method.calldataValidations && {
                             "Calldata Validations": method.calldataValidations.map(

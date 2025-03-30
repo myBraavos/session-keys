@@ -22,7 +22,7 @@ const getGasSponsoredSessionRequestTypedData = (request, chainId, version = "v1"
             "Allowed Methods": request.requestedMethods.map(method => {
                 return {
                     "Contract Address": method.contractAddress,
-                    Selector: starknet_1.hash.getSelectorFromName(method.entrypoint),
+                    Selector: method.selector ?? starknet_1.hash.getSelectorFromName(method.entrypoint),
                     ...(version === "v2" &&
                         method.calldataValidations && {
                         "Calldata Validations": method.calldataValidations.map(validation => {
