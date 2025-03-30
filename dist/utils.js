@@ -11,7 +11,7 @@ const GAS_SPONSORED_SESSION_EXECUTION_HASH_V2 = starknet_1.typedData.getTypeHash
 const getRequestedMethodGuid = (requestedMethod) => starknet_1.hash.computePoseidonHashOnElements([
     ALLOWED_METHOD_HASH,
     requestedMethod.contractAddress,
-    starknet_1.selector.getSelectorFromName(requestedMethod.entrypoint),
+    requestedMethod.selector ?? starknet_1.selector.getSelectorFromName(requestedMethod.entrypoint),
 ]);
 const getCalldataValidationHash = (validation) => starknet_1.hash.computePoseidonHashOnElements([
     CALLDATA_VALIDATION_HASH,
@@ -22,7 +22,7 @@ const getCalldataValidationHash = (validation) => starknet_1.hash.computePoseido
 const getRequestedMethodGuidV2 = (requestedMethod) => starknet_1.hash.computePoseidonHashOnElements([
     ALLOWED_METHOD_HASH_V2,
     requestedMethod.contractAddress,
-    starknet_1.selector.getSelectorFromName(requestedMethod.entrypoint),
+    requestedMethod.selector ?? starknet_1.selector.getSelectorFromName(requestedMethod.entrypoint),
     starknet_1.hash.computePoseidonHashOnElements(requestedMethod.calldataValidations?.map(validation => getCalldataValidationHash(validation)) || []),
 ]);
 const getAllowedMethodCalldata = (requestedMethods, version = "v1") => {
@@ -40,13 +40,13 @@ const noCalldataContradiction = (requestedMethod, call) => {
         validation.value ===
             (Array.isArray(call.calldata)
                 ? call.calldata[validation.offset]
-                : undefined)) || true);
+                : undefined)) ?? true);
 };
 const getAllowedMethodHintsCalldata = (requestedMethods, calls) => {
     return [
         calls.length,
         ...calls.map(call => requestedMethods.findIndex(rm => rm.contractAddress === call.contractAddress &&
-            rm.entrypoint === call.entrypoint &&
+            rm.entrypoint ? rm.entrypoint === call.entrypoint : rm.selector === starknet_1.selector.getSelectorFromName(call.entrypoint) &&
             noCalldataContradiction(rm, call))),
     ];
 };

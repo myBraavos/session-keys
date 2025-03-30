@@ -45,7 +45,7 @@ const getRequestedMethodGuid = (requestedMethod: RequestedMethod): string =>
     hash.computePoseidonHashOnElements([
         ALLOWED_METHOD_HASH,
         requestedMethod.contractAddress,
-        selector.getSelectorFromName(requestedMethod.entrypoint),
+        requestedMethod.selector ?? selector.getSelectorFromName(requestedMethod.entrypoint!),
     ]);
 
 const getCalldataValidationHash = (validation: CalldataValidation): string =>
@@ -60,7 +60,7 @@ const getRequestedMethodGuidV2 = (requestedMethod: RequestedMethod): string =>
     hash.computePoseidonHashOnElements([
         ALLOWED_METHOD_HASH_V2,
         requestedMethod.contractAddress,
-        selector.getSelectorFromName(requestedMethod.entrypoint),
+        requestedMethod.selector ?? selector.getSelectorFromName(requestedMethod.entrypoint!),
         hash.computePoseidonHashOnElements(
             requestedMethod.calldataValidations?.map(validation =>
                 getCalldataValidationHash(validation)
@@ -95,7 +95,7 @@ const noCalldataContradiction = (
                     (Array.isArray(call.calldata)
                         ? call.calldata[validation.offset]
                         : undefined)
-        ) || true
+        ) ?? true
     );
 };
 
@@ -109,7 +109,7 @@ const getAllowedMethodHintsCalldata = (
             requestedMethods.findIndex(
                 rm =>
                     rm.contractAddress === call.contractAddress &&
-                    rm.entrypoint === call.entrypoint &&
+                        rm.entrypoint ? rm.entrypoint === call.entrypoint : rm.selector === selector.getSelectorFromName(call.entrypoint) &&
                     noCalldataContradiction(rm, call)
             )
         ),

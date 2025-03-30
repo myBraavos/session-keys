@@ -11,7 +11,8 @@ export type CalldataValidation = {
 
 export type RequestedMethod = {
     contractAddress: string;
-    entrypoint: string;
+    entrypoint?: string;
+    selector?: string;
     calldataValidations?: CalldataValidation[];
 };
 
