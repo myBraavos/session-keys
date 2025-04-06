@@ -67,7 +67,7 @@ exports.numberToHex = numberToHex;
 const getAllowedMethodHintsCalldata = (requestedMethods, calls) => {
     return [
         calls.length,
-        ...calls.map(call => requestedMethods.findIndex(rm => rm.contractAddress === call.contractAddress &&
+        ...calls.map(call => requestedMethods.findIndex(rm => (0, exports.numberToHex)(rm.contractAddress) === (0, exports.numberToHex)(call.contractAddress) &&
             (rm.entrypoint ? rm.entrypoint === call.entrypoint : (0, exports.numberToHex)(rm.selector) === (0, exports.numberToHex)(starknet_1.selector.getSelectorFromName(call.entrypoint))) &&
             noCalldataContradiction(rm, call))),
     ];

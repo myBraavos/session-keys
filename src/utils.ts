@@ -135,7 +135,7 @@ const getAllowedMethodHintsCalldata = (
         ...calls.map(call =>
             requestedMethods.findIndex(
                 rm =>
-                    rm.contractAddress === call.contractAddress &&
+                    numberToHex(rm.contractAddress) === numberToHex(call.contractAddress) &&
                     (rm.entrypoint ? rm.entrypoint === call.entrypoint : numberToHex(rm.selector!) === numberToHex(selector.getSelectorFromName(call.entrypoint))) &&
                     noCalldataContradiction(rm, call)
             )
