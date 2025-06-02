@@ -5,7 +5,6 @@ import {
     hash,
     stark,
     Account,
-    Abi,
     AllowArray,
     CairoVersion,
     InvokeFunctionResponse,
@@ -14,10 +13,10 @@ import {
     SignerInterface,
     UniversalDetails,
     EstimateFee,
+    ETransactionVersion,
 } from "starknet";
 import { SessionAccountRequest, SessionInfo, SessionSignatureRequest } from "./types";
 import { getStarkKey, utils } from "micro-starknet";
-import { ETransactionVersion } from "starknet-types";
 import { Buffer } from "buffer";
 import { SESSION_REQUEST_TYPES } from "./typedDataConsts";
 import {
@@ -51,7 +50,9 @@ const getSessionRequestTypedData = (
             "Allowed Methods": request.requestedMethods.map(method => {
                 return {
                     "Contract Address": method.contractAddress,
-                    Selector: numberToHex(method.selector ?? hash.getSelectorFromName(method.entrypoint!)),
+                    Selector: numberToHex(
+                        method.selector ?? hash.getSelectorFromName(method.entrypoint!)
+                    ),
                     ...(version === "v2" &&
                         method.calldataValidations && {
                             "Calldata Validations": method.calldataValidations.map(
@@ -128,11 +129,10 @@ class SessionAccount extends Account {
 
     execute(
         transactions: AllowArray<Call>,
-        abis?: Abi[] | undefined,
         details?: UniversalDetails
     ): Promise<InvokeFunctionResponse> {
         const sessionCalls = this.getSessionCalls(transactions);
-        return super.execute(sessionCalls, abis, { ...details });
+        return super.execute(sessionCalls, { ...details });
     }
 
     estimateInvokeFee(

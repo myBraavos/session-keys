@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSessionRequestTypedData = exports.requestSessionAccount = void 0;
 const starknet_1 = require("starknet");
 const micro_starknet_1 = require("micro-starknet");
-const starknet_types_1 = require("starknet-types");
 const buffer_1 = require("buffer");
 const typedDataConsts_1 = require("./typedDataConsts");
 const utils_1 = require("./utils");
@@ -51,7 +50,7 @@ const getSessionRequestTypedData = (request, chainId, version = "v2") => {
 exports.getSessionRequestTypedData = getSessionRequestTypedData;
 class SessionAccount extends starknet_1.Account {
     constructor(sessionRequest, providerOrOptions, address, pkOrSigner, sessionKeyVersion, cairoVersion) {
-        super(providerOrOptions, address, pkOrSigner, cairoVersion, starknet_types_1.ETransactionVersion.V3);
+        super(providerOrOptions, address, pkOrSigner, cairoVersion, starknet_1.ETransactionVersion.V3);
         this.sessionRequest = sessionRequest;
         this.sessionKeyVersion = sessionKeyVersion || "v1";
     }
@@ -78,9 +77,9 @@ class SessionAccount extends starknet_1.Account {
         };
         return [sessionExecuteCall, ...calls];
     }
-    execute(transactions, abis, details) {
+    execute(transactions, details) {
         const sessionCalls = this.getSessionCalls(transactions);
-        return super.execute(sessionCalls, abis, { ...details });
+        return super.execute(sessionCalls, { ...details });
     }
     estimateInvokeFee(calls, details) {
         return super.estimateInvokeFee(calls, { ...details, skipValidate: false });

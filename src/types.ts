@@ -1,5 +1,5 @@
 import { Call, Signature, Uint256 } from "starknet";
-import { u128 } from "starknet-types/dist/types/api/components";
+import { u128 } from "@starknet-io/types-js";
 
 export type CalldataValidationType = 0;
 
