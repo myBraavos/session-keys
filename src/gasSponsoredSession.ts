@@ -28,7 +28,9 @@ const getGasSponsoredSessionRequestTypedData = (
             "Allowed Methods": request.requestedMethods.map(method => {
                 return {
                     "Contract Address": method.contractAddress,
-                    Selector: numberToHex(method.selector ?? hash.getSelectorFromName(method.entrypoint!)),
+                    Selector: numberToHex(
+                        method.selector ?? hash.getSelectorFromName(method.entrypoint!)
+                    ),
                     ...(version === "v2" &&
                         method.calldataValidations && {
                             "Calldata Validations": method.calldataValidations.map(

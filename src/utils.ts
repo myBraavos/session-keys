@@ -8,6 +8,7 @@ import {
     RawArgs,
     stark,
     CallData,
+    TypedDataRevision,
 } from "starknet";
 import { GS_SESSION_REQUEST_TYPES } from "./typedDataConsts";
 import { GS_SESSION_REQUEST_TYPES_V2 } from "./typedDataConstsV2";
@@ -21,32 +22,35 @@ import {
 const ALLOWED_METHOD_HASH = typedData.getTypeHash(
     GS_SESSION_REQUEST_TYPES,
     "AllowedMethod",
-    typedData.TypedDataRevision.Active
+    TypedDataRevision.ACTIVE
 );
 
 const ALLOWED_METHOD_HASH_V2 = typedData.getTypeHash(
     GS_SESSION_REQUEST_TYPES_V2,
     "AllowedMethod",
-    typedData.TypedDataRevision.Active
+    TypedDataRevision.ACTIVE
 );
 
 const CALLDATA_VALIDATION_HASH = typedData.getTypeHash(
     GS_SESSION_REQUEST_TYPES_V2,
     "CalldataValidation",
-    typedData.TypedDataRevision.Active
+    TypedDataRevision.ACTIVE
 );
 
 const GAS_SPONSORED_SESSION_EXECUTION_HASH_V2 = typedData.getTypeHash(
     GS_SESSION_REQUEST_TYPES_V2,
     "GasSponsoredSessionExecution",
-    typedData.TypedDataRevision.Active
+    TypedDataRevision.ACTIVE
 );
 
 const getRequestedMethodGuid = (requestedMethod: RequestedMethod): string =>
     hash.computePoseidonHashOnElements([
         ALLOWED_METHOD_HASH,
         requestedMethod.contractAddress,
-        numberToHex(requestedMethod.selector ?? selector.getSelectorFromName(requestedMethod.entrypoint!)),
+        numberToHex(
+            requestedMethod.selector ??
+                selector.getSelectorFromName(requestedMethod.entrypoint!)
+        ),
     ]);
 
 const getCalldataValidationHash = (validation: CalldataValidation): string =>
@@ -61,7 +65,10 @@ const getRequestedMethodGuidV2 = (requestedMethod: RequestedMethod): string =>
     hash.computePoseidonHashOnElements([
         ALLOWED_METHOD_HASH_V2,
         requestedMethod.contractAddress,
-        numberToHex(requestedMethod.selector ?? selector.getSelectorFromName(requestedMethod.entrypoint!)),
+        numberToHex(
+            requestedMethod.selector ??
+                selector.getSelectorFromName(requestedMethod.entrypoint!)
+        ),
         hash.computePoseidonHashOnElements(
             requestedMethod.calldataValidations?.map(validation =>
                 getCalldataValidationHash(validation)
@@ -87,7 +94,7 @@ const noCalldataContradiction = (
     requestedMethod: RequestedMethod,
     call: Call
 ): boolean => {
-    const calldata = CallData.compile(call.calldata!)
+    const calldata = CallData.compile(call.calldata!);
     return (
         requestedMethod.calldataValidations?.every(
             validation =>
@@ -135,8 +142,12 @@ const getAllowedMethodHintsCalldata = (
         ...calls.map(call =>
             requestedMethods.findIndex(
                 rm =>
-                    numberToHex(rm.contractAddress) === numberToHex(call.contractAddress) &&
-                    (rm.entrypoint ? rm.entrypoint === call.entrypoint : numberToHex(rm.selector!) === numberToHex(selector.getSelectorFromName(call.entrypoint))) &&
+                    numberToHex(rm.contractAddress) ===
+                        numberToHex(call.contractAddress) &&
+                    (rm.entrypoint
+                        ? rm.entrypoint === call.entrypoint
+                        : numberToHex(rm.selector!) ===
+                          numberToHex(selector.getSelectorFromName(call.entrypoint))) &&
                     noCalldataContradiction(rm, call)
             )
         ),
