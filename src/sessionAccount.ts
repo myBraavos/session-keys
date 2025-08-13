@@ -12,8 +12,8 @@ import {
     ProviderOptions,
     SignerInterface,
     UniversalDetails,
-    EstimateFee,
     ETransactionVersion,
+    EstimateFeeResponseOverhead,
 } from "starknet";
 import { SessionAccountRequest, SessionInfo, SessionSignatureRequest } from "./types";
 import { getStarkKey, utils } from "micro-starknet";
@@ -89,13 +89,13 @@ class SessionAccount extends Account {
         sessionKeyVersion?: "v1" | "v2",
         cairoVersion?: CairoVersion
     ) {
-        super(
-            providerOrOptions,
+        super({
+            provider: providerOrOptions,
             address,
-            pkOrSigner,
-            cairoVersion,
-            ETransactionVersion.V3
-        );
+            signer: pkOrSigner,
+            cairoVersion: cairoVersion,
+            transactionVersion: ETransactionVersion.V3,
+        });
         this.sessionRequest = sessionRequest;
         this.sessionKeyVersion = sessionKeyVersion || "v1";
     }
@@ -138,7 +138,7 @@ class SessionAccount extends Account {
     estimateInvokeFee(
         calls: AllowArray<Call>,
         details?: UniversalDetails
-    ): Promise<EstimateFee> {
+    ): Promise<EstimateFeeResponseOverhead> {
         return super.estimateInvokeFee(calls, { ...details, skipValidate: false });
     }
 }

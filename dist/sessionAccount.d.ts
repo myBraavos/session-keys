@@ -1,4 +1,4 @@
-import { AccountInterface, Call, TypedData, Account, AllowArray, CairoVersion, InvokeFunctionResponse, ProviderInterface, ProviderOptions, SignerInterface, UniversalDetails, EstimateFee } from "starknet";
+import { AccountInterface, Call, TypedData, Account, AllowArray, CairoVersion, InvokeFunctionResponse, ProviderInterface, ProviderOptions, SignerInterface, UniversalDetails, EstimateFeeResponseOverhead } from "starknet";
 import { SessionAccountRequest, SessionInfo, SessionSignatureRequest } from "./types";
 declare const getSessionRequestTypedData: (request: SessionSignatureRequest, chainId: string | number, version?: "v1" | "v2") => TypedData;
 declare class SessionAccount extends Account {
@@ -7,7 +7,7 @@ declare class SessionAccount extends Account {
     constructor(sessionRequest: SessionInfo, providerOrOptions: ProviderOptions | ProviderInterface, address: string, pkOrSigner: Uint8Array | string | SignerInterface, sessionKeyVersion?: "v1" | "v2", cairoVersion?: CairoVersion);
     private getSessionCalls;
     execute(transactions: AllowArray<Call>, details?: UniversalDetails): Promise<InvokeFunctionResponse>;
-    estimateInvokeFee(calls: AllowArray<Call>, details?: UniversalDetails): Promise<EstimateFee>;
+    estimateInvokeFee(calls: AllowArray<Call>, details?: UniversalDetails): Promise<EstimateFeeResponseOverhead>;
 }
 declare const requestSessionAccount: (provider: ProviderInterface, account: AccountInterface, request: SessionAccountRequest, sessionKeyVersion?: "v1" | "v2") => Promise<SessionAccount>;
 export { requestSessionAccount, getSessionRequestTypedData };
