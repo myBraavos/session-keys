@@ -50,7 +50,13 @@ const getSessionRequestTypedData = (request, chainId, version = "v2") => {
 exports.getSessionRequestTypedData = getSessionRequestTypedData;
 class SessionAccount extends starknet_1.Account {
     constructor(sessionRequest, providerOrOptions, address, pkOrSigner, sessionKeyVersion, cairoVersion) {
-        super(providerOrOptions, address, pkOrSigner, cairoVersion, starknet_1.ETransactionVersion.V3);
+        super({
+            provider: providerOrOptions,
+            address,
+            signer: pkOrSigner,
+            cairoVersion: cairoVersion,
+            transactionVersion: starknet_1.ETransactionVersion.V3,
+        });
         this.sessionRequest = sessionRequest;
         this.sessionKeyVersion = sessionKeyVersion || "v1";
     }
